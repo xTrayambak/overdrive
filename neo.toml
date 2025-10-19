@@ -1,0 +1,14 @@
+[package]
+name = "overdrive"
+version = "0.1.0"
+license = "BSD-3-Clause"
+kind = "Library"
+backend = "C"
+binaries = []
+
+[toolchain]
+version = "2.2.0"
+
+[dependencies]
+nimsimd = ">= 1.3.2"
+shakar = ">= 0.1.3"
