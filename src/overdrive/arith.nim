@@ -4,47 +4,49 @@
 import pkg/overdrive/[flags, types]
 import pkg/shakar
 
-template addVecAvx2Impl[U: Vectorizable](a, b: Vector[U]): Vector[U] =
-  Vector[U](
-    reg:
-      case a.size
-      of 1:
-        # uint8 (32x u8)
-        mm256_add_epi8(a.reg, b.reg)
-      of 2:
-        # uint16 (16x u16)
-        mm256_add_epi16(a.reg, b.reg)
-      of 4:
-        # uint32 (8x u32)
-        mm256_add_epi32(a.reg, b.reg)
-      of 8:
-        # uint64 (4x u64)
-        mm256_add_epi64(a.reg, b.reg)
-      else:
-        unreachable
-        M256i()
-  )
+when hasAvx2:
+  template addVecAvx2Impl[U: Vectorizable](a, b: Vector[U]): Vector[U] =
+    Vector[U](
+      reg:
+        case a.size
+        of 1:
+          # uint8 (32x u8)
+          mm256_add_epi8(a.reg, b.reg)
+        of 2:
+          # uint16 (16x u16)
+          mm256_add_epi16(a.reg, b.reg)
+        of 4:
+          # uint32 (8x u32)
+          mm256_add_epi32(a.reg, b.reg)
+        of 8:
+          # uint64 (4x u64)
+          mm256_add_epi64(a.reg, b.reg)
+        else:
+          unreachable
+          M256i()
+    )
 
-template addVecSseImpl[U: Vectorizable](a, b: Vector[U]): Vector[U] =
-  Vector[U](
-    reg:
-      case a.size
-      of 1:
-        # uint8 (16x u8)
-        mm_add_epi8(a.reg, b.reg)
-      of 2:
-        # uint16 (8x u16)
-        mm_add_epi16(a.reg, b.reg)
-      of 4:
-        # uint32 (4x u32)
-        mm_add_epi32(a.reg, b.reg)
-      of 8:
-        # uint64 (2x u64)
-        mm_add_epi64(a.reg, b.reg)
-      else:
-        unreachable
-        M128i()
-  )
+when hasSse2:
+  template addVecSseImpl[U: Vectorizable](a, b: Vector[U]): Vector[U] =
+    Vector[U](
+      reg:
+        case a.size
+        of 1:
+          # uint8 (16x u8)
+          mm_add_epi8(a.reg, b.reg)
+        of 2:
+          # uint16 (8x u16)
+          mm_add_epi16(a.reg, b.reg)
+        of 4:
+          # uint32 (4x u32)
+          mm_add_epi32(a.reg, b.reg)
+        of 8:
+          # uint64 (2x u64)
+          mm_add_epi64(a.reg, b.reg)
+        else:
+          unreachable
+          M128i()
+    )
 
 func `+`*[U: Vectorizable](a, b: Vector[U]): Vector[U] {.inline.} =
   when hasAvx2:
@@ -52,4 +54,4 @@ func `+`*[U: Vectorizable](a, b: Vector[U]): Vector[U] {.inline.} =
   elif hasSse2:
     addVecSseImpl(a, b)
   else:
-    unreachable
+    {.error: "Unsupported architecture for `+`".}
