@@ -26,6 +26,27 @@ when hasAvx2:
           M256i()
     )
 
+  template subVecAvx2Impl[U: Vectorizable](a, b: Vector[U]): Vector[U] =
+    Vector[U](
+      reg:
+        case a.size
+        of 1:
+          # uint8 (32x u8)
+          mm256_sub_epi8(a.reg, b.reg)
+        of 2:
+          # uint16 (16x u16)
+          mm256_sub_epi16(a.reg, b.reg)
+        of 4:
+          # uint32 (8x u32)
+          mm256_sub_epi32(a.reg, b.reg)
+        of 8:
+          # uint64 (4x u64)
+          mm256_sub_epi64(a.reg, b.reg)
+        else:
+          unreachable
+          M256i()
+    )
+
 when hasSse2:
   template addVecSseImpl[U: Vectorizable](a, b: Vector[U]): Vector[U] =
     Vector[U](
@@ -48,6 +69,27 @@ when hasSse2:
           M128i()
     )
 
+  template subVecSseImpl[U: Vectorizable](a, b: Vector[U]): Vector[U] =
+    Vector[U](
+      reg:
+        case a.size
+        of 1:
+          # uint8 (16x u8)
+          mm_sub_epi8(a.reg, b.reg)
+        of 2:
+          # uint16 (8x u16)
+          mm_sub_epi16(a.reg, b.reg)
+        of 4:
+          # uint32 (4x u32)
+          mm_sub_epi32(a.reg, b.reg)
+        of 8:
+          # uint64 (2x u32)
+          mm_sub_epi64(a.reg, b.reg)
+        else:
+          unreachable
+          M128i()
+    )
+
 func `+`*[U: Vectorizable](a, b: Vector[U]): Vector[U] {.inline.} =
   when hasAvx2:
     addVecAvx2Impl(a, b)
@@ -55,3 +97,11 @@ func `+`*[U: Vectorizable](a, b: Vector[U]): Vector[U] {.inline.} =
     addVecSseImpl(a, b)
   else:
     {.error: "Unsupported architecture for `+`".}
+
+func `-`*[U: Vectorizable](a, b: Vector[U]): Vector[U] {.inline.} =
+  when hasAvx2:
+    subVecAvx2Impl(a, b)
+  elif hasSse2:
+    subVecSseImpl(a, b)
+  else:
+    {.error: "Unsupported architecture for `-`".}
