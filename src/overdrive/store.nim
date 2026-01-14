@@ -33,7 +33,7 @@ when hasAvx2:
       # 4x u16
       vec.reg = mm256_set1_epi64x(src)
     else:
-      unreachable
+      {.error: "Unsupported type for storage in AVX2 register: " & $U.}
 
 template storeContainerScalarImpl[U: Vectorizable](
     vec: var Vector[U], src: openArray[U]
@@ -82,7 +82,7 @@ when hasSse2:
     elif U is uint64 or U is int64:
       vec.reg = mm_set1_epi64x(src)
     else:
-      unreachable
+      {.error: "Unsupported type for storage in SSE register: " & $U.}
 
 func store*[U: Vectorizable](
     vec: var Vector[U], src: openArray[U]
