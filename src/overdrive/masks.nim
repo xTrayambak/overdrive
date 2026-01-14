@@ -4,36 +4,38 @@
 import pkg/overdrive/[flags, types]
 
 when hasAvx2:
-  {.push checks: off, inline.}
-  func mask8*(vec: M256i, against: M256i): int32 =
+  template mask8*(vec: M256i, against: M256i): int32 =
     mm256_movemask_epi8(mm256_cmpeq_epi8(vec, against))
 
-  func mask16*(vec: M256i, against: M256i): int32 =
+  template mask16*(vec: M256i, against: M256i): int32 =
     mm256_movemask_epi8(mm256_cmpeq_epi16(vec, against))
 
-  func mask32*(vec: M256i, against: M256i): int32 =
+  template mask32*(vec: M256i, against: M256i): int32 =
     mm256_movemask_epi8(mm256_cmpeq_epi32(vec, against))
 
-  func mask64*(vec: M256i, against: M256i): int32 =
+  template mask64*(vec: M256i, against: M256i): int32 =
     mm256_movemask_epi8(mm256_cmpeq_epi64(vec, against))
-  {.pop.}
+
+  template moveMaskAvx2Impl*(vec: M256i): M256i =
+    mm256_movemask_epi8(vec)
+
 else:
   when hasSse2:
-    {.push checks: off, inline.}
-    func mask8*(vec: M128i, against: M128i): int32 =
+    template mask8*(vec: M128i, against: M128i): int32 =
       mm_movemask_epi8(mm_cmpeq_epi8(vec, against))
 
-    func mask16*(vec: M128i, against: M128i): int32 =
+    template mask16*(vec: M128i, against: M128i): int32 =
       mm_movemask_epi8(mm_cmpeq_epi16(vec, against))
 
-    func mask32*(vec: M128i, against: M128i): int32 =
+    template mask32*(vec: M128i, against: M128i): int32 =
       mm_movemask_epi8(mm_cmpeq_epi32(vec, against))
 
     when hasSse41:
-      func mask64*(vec: M128i, against: M128i): int32 =
+      template mask64*(vec: M128i, against: M128i): int32 =
         mm_movemask_epi8(mm_cmpeq_epi64(vec, against))
+
     else:
-      func mask64*(vec: M128i, against: M128i): int32 =
+      template mask64*(vec: M128i, against: M128i): int32 =
         {.
           warning: "Using slower SSE2 based mask64() op, performance will be degraded."
         .}
@@ -42,9 +44,8 @@ else:
         let e = mm_cmpeq_epi32(vec, against)
         mm_movemask_epi8(mm_and_si128(e, mm_shuffle_epi32(e, MM_SHUFFLE(2, 3, 0, 1))))
 
-    {.pop.}
   else:
-    func mask8*[U: Vectorizable](vec, against: RegisterImpl[U]): int32 =
+    template mask8*[U: Vectorizable](vec, against: RegisterImpl[U]): int32 =
       var eqRes: RegisterImpl[U]()
       for i in 0 ..< 32:
         #!fmt: off
@@ -63,11 +64,13 @@ else:
 
       move(mask)
 
-    func mask16*[U: Vectorizable](vec, against: RegisterImpl[U]): int32 =
+    template mask16*[U: Vectorizable](vec, against: RegisterImpl[U]): int32 =
       0'i32
-    func mask32*[U: Vectorizable](vec, against: RegisterImpl[U]): int32 =
+
+    template mask32*[U: Vectorizable](vec, against: RegisterImpl[U]): int32 =
       0'i32
-    func mask64*[U: Vectorizable](vec, against: RegisterImpl[U]): int32 =
+
+    template mask64*[U: Vectorizable](vec, against: RegisterImpl[U]): int32 =
       0'i32
 
 func mask*[U: Vectorizable](vec: Vector[U], against: Vector[U]): int32 {.inline.} =
