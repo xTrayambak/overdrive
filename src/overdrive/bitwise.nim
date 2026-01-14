@@ -2,11 +2,16 @@
 ##
 ## Copyright (C) 2026 Trayambak Rai (xtrayambak@disroot.org)
 import pkg/overdrive/[types, flags]
-import pkg/shakar
 
 when hasAvx2:
   template allZeroAvx2Impl[U: Vectorizable](a, b: Vector[U]): bool =
     mm256_testz_si256(a.reg, b.reg) == 0'i32
+
+  template andAvx2Impl[U: Vectorizable](a, b: Vector[U]): Vector[U] =
+    Vector[U](reg: mm256_and_si256(a.reg, b.reg))
+
+  template orAvx2Impl[U: Vectorizable](a, b: Vector[U]): Vector[U] =
+    Vector[U](reg: mm256_or_si256(a.reg, b.reg))
 
 when hasSse41:
   template allZeroSse41Impl[U: Vectorizable](a, b: Vector[U]): bool =
@@ -24,6 +29,12 @@ when hasSse2:
 
     return mm_cvtsi12_si32(t) == 0'i32
 
+  template andSse2Impl[U: Vectorizable](a, b: Vector[U]): Vector[U] =
+    Vector[U](reg: mm_and_si128(a.reg, b.reg))
+
+  template orSse2Impl[U: Vectorizable](a, b: Vector[U]): Vector[U] =
+    Vector[U](reg: mm_or_si128(a.reg, b.reg))
+
 func allZero*[U: Vectorizable](a, b: Vector[U]): bool =
   when hasAvx2:
     allZeroAvx2Impl(a, b)
@@ -33,3 +44,19 @@ func allZero*[U: Vectorizable](a, b: Vector[U]): bool =
     allZeroSse2Impl(a, b)
   else:
     {.error: "Unsupported architecture for allZero()".}
+
+func `and`*[U: Vectorizable](a, b: Vector[U]): Vector[U] =
+  when hasAvx2:
+    andAvx2Impl(a, b)
+  elif hasSse2:
+    andSse2Impl(a, b)
+  else:
+    {.error: "Unsupported architecture for `and`".}
+
+func `or`*[U: Vectorizable](a, b: Vector[U]): Vector[U] =
+  when hasAvx2:
+    orAvx2Impl(a, b)
+  elif hasSse2:
+    orSse2Impl(a, b)
+  else:
+    {.error: "Unsupported architecture for `or`".}
