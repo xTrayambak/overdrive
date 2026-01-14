@@ -44,6 +44,9 @@ else:
         let e = mm_cmpeq_epi32(vec, against)
         mm_movemask_epi8(mm_and_si128(e, mm_shuffle_epi32(e, MM_SHUFFLE(2, 3, 0, 1))))
 
+    template moveMaskSse2Impl(vec: M128i): M128i =
+      mm_movemask_epi8(vec)
+
   else:
     template mask8*[U: Vectorizable](vec, against: RegisterImpl[U]): int32 =
       var eqRes: RegisterImpl[U]()
@@ -86,6 +89,14 @@ func mask*[U: Vectorizable](vec: Vector[U], against: Vector[U]): int32 {.inline.
   elif vec.size == 8:
     # 4x uint64
     return mask64(vec.reg, against.reg)
+
+func moveMask*[U: Vectorizable](vec: Vector[U]): Vector[U] {.inline.} =
+  when hasAvx2:
+    moveMaskAvx2Impl(vec.reg)
+  elif hasSse2:
+    moveMaskSse2Impl(vec.reg)
+  else:
+    {.error: "Unsupported architecture for moveMask()".}
 
 func findAllOccurrences*[U: Vectorizable](
     vec: Vector[U], against: Vector[U]
