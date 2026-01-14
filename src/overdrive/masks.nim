@@ -16,7 +16,7 @@ when hasAvx2:
   template mask64*(vec: M256i, against: M256i): int32 =
     mm256_movemask_epi8(mm256_cmpeq_epi64(vec, against))
 
-  template moveMaskAvx2Impl*(vec: M256i): M256i =
+  template moveMaskAvx2Impl*(vec: M256i): int32 =
     mm256_movemask_epi8(vec)
 
 else:
@@ -44,7 +44,7 @@ else:
         let e = mm_cmpeq_epi32(vec, against)
         mm_movemask_epi8(mm_and_si128(e, mm_shuffle_epi32(e, MM_SHUFFLE(2, 3, 0, 1))))
 
-    template moveMaskSse2Impl(vec: M128i): M128i =
+    template moveMaskSse2Impl(vec: M128i): int32 =
       mm_movemask_epi8(vec)
 
   else:
@@ -90,7 +90,7 @@ func mask*[U: Vectorizable](vec: Vector[U], against: Vector[U]): int32 {.inline.
     # 4x uint64
     return mask64(vec.reg, against.reg)
 
-func moveMask*[U: Vectorizable](vec: Vector[U]): Vector[U] {.inline.} =
+func moveMask*[U: Vectorizable](vec: Vector[U]): int32 {.inline.} =
   when hasAvx2:
     moveMaskAvx2Impl(vec.reg)
   elif hasSse2:
