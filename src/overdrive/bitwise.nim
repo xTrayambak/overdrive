@@ -27,7 +27,7 @@ when hasSse2:
 
     t = mm_or_si128(t, mm_srli_si128(t, 4))
 
-    return mm_cvtsi12_si32(t) == 0'i32
+    mm_cvtsi128_si32(t) == 0'i32
 
   template andSse2Impl[U: Vectorizable](a, b: Vector[U]): Vector[U] =
     Vector[U](reg: mm_and_si128(a.reg, b.reg))
