@@ -22,7 +22,7 @@ when hasAvx2:
   template storeOneAvx2Impl[U: Vectorizable](vec: var Vector[U], src: U) =
     when U is uint8 or U is int8 or U is char:
       # 32x u8
-      vec.reg = mm256_set1_epi8(src)
+      vec.reg = mm256_set1_epi8(cast[uint8](src))
     elif U is uint16 or U is int16:
       # 16x u16
       vec.reg = mm256_set1_epi16(src)
