@@ -2,6 +2,6 @@
 ##
 ## Copyright (C) 2025 Trayambak Rai (xtrayambak at disroot dot org)
 
-import pkg/overdrive/[arith, masks, flags, indexing, store, types]
+import pkg/overdrive/[arith, bitwise, masks, flags, indexing, store, types]
 
-export arith, masks, flags, indexing, store, types
+export arith, bitwise, masks, flags, indexing, store, types
