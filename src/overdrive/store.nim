@@ -65,7 +65,7 @@ func store*[U: Vectorizable](vec: var Vector[U], src: ptr U) {.discardable.} =
     storePtrScalarImpl(vec, src)
 
 template storeOneAvx2Impl[U: Vectorizable](vec: var Vector[U], src: U) =
-  when U is uint8 or U is int8:
+  when U is uint8 or U is int8 or U is char:
     # 32x u8
     vec.reg = mm256_set1_epi8(src)
   elif U is uint16 or U is int16:
@@ -87,7 +87,7 @@ template storeOneScalarImpl[U: Vectorizable](vec: var Vector[U], src: U) =
     inc i
 
 template storeOneSseImpl[U: Vectorizable](vec: var Vector[U], src: U) =
-  when U is uint8 or U is int8:
+  when U is uint8 or U is int8 or U is char:
     vec.reg = mm_set1_epi8(src)
   elif U is uint16 or U is int16:
     vec.reg = mm_set1_epi16(src)
