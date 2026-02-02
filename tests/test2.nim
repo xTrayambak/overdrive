@@ -1,4 +1,4 @@
-import pkg/overdrive, pkg/pretty
+import pkg/overdrive
 
 var c: Vector[uint8]
 c.store(0x80)

@@ -8,11 +8,22 @@ const ScalarSWRegisterSize* {.intdefine: "OverdriveScalarRegSize".} = 32
 type
   Vectorizable* = SomeNumber | char | byte
 
-  RegisterImpl*[U: Vectorizable] = (
+  RegisterImpl*[U: Vectorizable] {.pure.} = (
     when hasAvx2:
       M256i
     elif hasSse2 or hasSse3 or hasSse41:
       M128i
+    elif hasNeon:
+      when sizeof(U) == 1:
+        uint8x16
+      elif sizeof(U) == 2:
+        uint16x8
+      elif sizeof(U) == 4:
+        uint32x4
+      elif sizeof(U) == 8:
+        uint64x2
+      else:
+        {.error: "Cannot fit type into NEON register: " & $U.}
     else:
       array[ScalarSWRegisterSize, U]
   )

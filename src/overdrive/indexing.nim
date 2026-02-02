@@ -155,6 +155,38 @@ elif hasSse2:
         v: Vector[U], i: static int
     ): uint64 {.inline, raises: [IndexDefect].} =
       cast[uint64](indexI64(v, i))
+elif hasNeon:
+  func indexU8*[U: Vectorizable](
+      v: Vector[U], i: static int
+  ): uint8 {.inline, raises: [IndexDefect].} =
+    if i > 15:
+      raise newException(IndexDefect, "Cannot index " & $i & "th index from Vector!")
+
+    vgetq_lane_u8(v.reg, i)
+
+  func indexU16*[U: Vectorizable](
+      v: Vector[U], i: static int
+  ): uint16 {.inline, raises: [IndexDefect].} =
+    if i > 15:
+      raise newException(IndexDefect, "Cannot index " & $i & "th index from Vector!")
+
+    vgetq_lane_u16(v.reg, i)
+
+  func indexU32*[U: Vectorizable](
+      v: Vector[U], i: static int
+  ): uint32 {.inline, raises: [IndexDefect].} =
+    if i > 7:
+      raise newException(IndexDefect, "Cannot index " & $i & "th index from Vector!")
+
+    vgetq_lane_u32(v.reg, i)
+
+  func indexU64*[U: Vectorizable](
+      v: Vector[U], i: static int
+  ): uint64 {.inline, raises: [IndexDefect].} =
+    if i > 1:
+      raise newException(IndexDefect, "Cannot index " & $i & "th index from Vector!")
+
+    vgetq_lane_u64(v.reg, i)
 
 {.pop.}
 

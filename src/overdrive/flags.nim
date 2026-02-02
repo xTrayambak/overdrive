@@ -12,7 +12,9 @@ type VInstSet* {.pure, size: sizeof(uint8).} = enum
   Scalar
 
 const InstSet* =
-  when defined(amd64):
+  when defined(aarch64):
+    VInstSet.NEON
+  elif defined(amd64):
     when defined(avx2):
       VInstSet.AVX2
     elif defined(sse3):
@@ -26,8 +28,6 @@ const InstSet* =
       # program for an older system, explicitly
       # compile it with `-d:sse3` or even `-d:sse2`
       VInstSet.SSE4_1
-  elif defined(aarch64):
-    VInstSet.NEON
   else:
     VInstSet.Scalar
 

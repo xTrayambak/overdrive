@@ -84,6 +84,19 @@ when hasSse2:
     else:
       {.error: "Unsupported type for storage in SSE register: " & $U.}
 
+when hasNeon:
+  template storeOneNeonImpl[U: Vectorizable](vec: var Vector[U], src: U) =
+    when U is uint8 or U is int8 or U is char:
+      vec.reg = vmovq_n_u8(cast[uint8](src))
+    elif U is uint16 or U is int16:
+      vec.reg = vmovq_n_u16(cast[uint16](src))
+    elif U is uint32 or U is int32:
+      vec.reg = vmovq_n_u32(cast[uint32](src))
+    elif U is uint64 or U is int64:
+      vec.reg = vmovq_n_u64(cast[uint64](src))
+    else:
+      {.error: "Unsupported type for storage in NEON register: " & $U.}
+
 func store*[U: Vectorizable](
     vec: var Vector[U], src: openArray[U]
 ): int {.discardable.} =
@@ -107,6 +120,8 @@ func store*[U: Vectorizable](vec: var Vector[U], src: U) =
     storeOneAvx2Impl(vec, src)
   elif hasSse2:
     storeOneSseImpl(vec, src)
+  elif hasNeon:
+    storeOneNeonImpl(vec, src)
   else:
     storeOneScalarImpl(vec, src)
 
