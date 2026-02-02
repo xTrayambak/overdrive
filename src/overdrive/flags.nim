@@ -26,10 +26,19 @@ const InstSet* =
       # program for an older system, explicitly
       # compile it with `-d:sse3` or even `-d:sse2`
       VInstSet.SSE4_1
-  elif defined(aarch64) and defined(neon):
+  elif defined(aarch64):
     VInstSet.NEON
   else:
     VInstSet.Scalar
+
+func `$`(inst: VInstSet): string {.raises: [], compileTime.} =
+  case inst
+  of VInstSet.Scalar: "Scalar"
+  of VInstSet.AVX2: "AVX2"
+  of VInstSet.SSE3: "SSE3"
+  of VInstSet.SSE2: "SSE2"
+  of VInstSet.SSE4_1: "SSE4.1"
+  of VInstSet.NEON: "NEON"
 
 func getBackend*(): VInstSet {.inline, compileTime, raises: [].} =
   InstSet
