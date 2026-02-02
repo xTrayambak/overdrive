@@ -45,16 +45,31 @@ const
   hasSse2* = hasSse3 or InstSet == VInstSet.SSE2
   hasNeon* = InstSet == VInstSet.NEON
 
+  passCompilerSupportFlags =
+    not defined(overdriveDontPassCompilerFlags) and (defined(gcc) or defined(clang))
+
 when hasAvx2:
+  when passCompilerSupportFlags:
+    {.passC: "-mavx2".}
+
   import pkg/nimsimd/avx2
   export avx2
 elif hasSse41:
+  when passCompilerSupportFlags:
+    {.passC: "-msse4.1".}
+
   import pkg/nimsimd/[sse2, sse3, sse41]
   export sse2, sse3, sse41
 elif hasSse3:
+  when passCompilerSupportFlags:
+    {.passC: "-msse3".}
+
   import pkg/nimsimd/[sse2, sse3]
   export sse2, sse3
 elif hasSse2:
+  when passCompilerSupportFlags:
+    {.passC: "-msse2".}
+
   import pkg/nimsimd/sse2
   export sse2
 elif hasNeon:
