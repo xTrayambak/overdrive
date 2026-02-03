@@ -11,4 +11,4 @@ jobs:
           nim-version: '2.2.4'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
       - run: nimble install
-      - run: nim c -d:aarch64 -d:neon -r tests/test1.nim
+      - run: nimble test
