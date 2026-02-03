@@ -29,8 +29,23 @@ when hasAvx2:
     else:
       {.error: "Unsupported type for vector: " & $U.}
 
+when hasNeon:
+  template equalNeonImpl[U: Vectorizable](a, b: Vector[U]): RegisterImpl[U] =
+    when U is uint8 or U is int8 or U is char:
+      vceqq_u8(a.reg, b.reg)
+    elif U is uint16 or U is int16:
+      vceqq_u16(a.reg, b.reg)
+    elif U is uint32 or U is int32:
+      vceqq_u32(a.reg, b.reg)
+    elif U is uint64 or U is int64:
+      vceqq_u64(a.reg, b.reg)
+    else:
+      {.error: "Unsupported type for vector: " & $U.}
+
 template `==`*[U: Vectorizable](a, b: Vector[U]): Vector[U] =
   when hasAvx2:
     Vector[U](reg: equalAvx2Impl(a, b))
   elif hasSse2:
     Vector[U](reg: equalSse2Impl(a, b))
+  elif hasNeon:
+    Vector[U](reg: equalNeonImpl(a, b))
