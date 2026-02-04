@@ -35,6 +35,10 @@ when hasSse2:
   template orSse2Impl[U: Vectorizable](a, b: Vector[U]): Vector[U] =
     Vector[U](reg: mm_or_si128(a.reg, b.reg))
 
+when hasNeon:
+  template allZeroNeonImpl[U: Vectorizable](a, b: Vector[U]): bool =
+    vmaxvq_u8(vandq_u8(a.reg, b.reg)) == 0'u8
+
 func allZero*[U: Vectorizable](a, b: Vector[U]): bool =
   when hasAvx2:
     allZeroAvx2Impl(a, b)
@@ -42,6 +46,8 @@ func allZero*[U: Vectorizable](a, b: Vector[U]): bool =
     allZeroSse41Impl(a, b)
   elif hasSse2:
     allZeroSse2Impl(a, b)
+  elif hasNeon:
+    allZeroNeonImpl(a, b)
   else:
     {.error: "Unsupported architecture for allZero()".}
 
