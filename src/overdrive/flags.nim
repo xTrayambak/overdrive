@@ -12,7 +12,7 @@ type VInstSet* {.pure, size: sizeof(uint8).} = enum
   Scalar
 
 const InstSet* =
-  when defined(aarch64):
+  when defined(arm64):
     VInstSet.NEON
   elif defined(amd64):
     when defined(avx2):
