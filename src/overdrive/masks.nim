@@ -23,9 +23,9 @@ when hasNeon:
   # Extra intrinsics nimsimd doesn't wrap.
   {.push importc, header: "arm_neon.h".}
 
-  func vsraq_n_u16*(a, b: uint16x8, n: static int32): uint16x8
-  func vsraq_n_u32*(a, b: uint32x4, n: static int32): uint32x4
-  func vsraq_n_u64*(a, b: uint64x2, n: static int32): uint64x2
+  func vsraq_n_u16*(a, b: uint16x8, n: int32): uint16x8
+  func vsraq_n_u32*(a, b: uint32x4, n: int32): uint32x4
+  func vsraq_n_u64*(a, b: uint64x2, n: int32): uint64x2
   func vreinterpretq_u32_u16*(v: uint16x8): uint32x4
   func vreinterpretq_u8_u64*(v: uint64x2): uint8x16
   func vreinterpretq_u8_u16*(v: uint16x8): uint8x16
