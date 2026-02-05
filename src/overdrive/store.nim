@@ -111,6 +111,18 @@ when hasNeon:
     else:
       {.error: "Unsupported type for storage in NEON register: " & $U.}
 
+  template storePtrNeonImpl[U: Vectorizable](vec: var Vector[U], src: ptr U) =
+    when U is uint8 or U is int8 or U is char:
+      vec.reg = cast[RegisterImpl[U]](vld1q_u8(src))
+    elif U is uint16 or U is int16:
+      vec.reg = cast[RegisterImpl[U]](vld1q_u16(src))
+    elif U is uint32 or U is int32:
+      vec.reg = cast[RegisterImpl[U]](vld1q_u32(src))
+    elif U is uint64 or U is int64:
+      vec.reg = cast[RegisterImpl[U]](vld1q_u16(src))
+    else:
+      {.error: "Unsupported type for storage in NEON register: " & $U.}
+
 func store*[U: Vectorizable](
     vec: var Vector[U], src: openArray[U]
 ): int {.discardable.} =
@@ -128,6 +140,8 @@ func store*[U: Vectorizable](vec: var Vector[U], src: ptr U) {.discardable.} =
     storePtrAvx2Impl(vec, src)
   elif hasSse2:
     storePtrSseImpl(vec, src)
+  elif hasNeon:
+    storePtrNeonImpl(vec, src)
   else:
     storePtrScalarImpl(vec, src)
 
