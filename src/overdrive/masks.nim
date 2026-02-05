@@ -32,7 +32,7 @@ when hasNeon:
 
   {.pop.}
 
-  template moveMaskNeonImpl(input: uint8x16): int32 =
+  template moveMaskNeonImpl2(input: uint8x16): int32 =
     # Source: https://stackoverflow.com/a/58381188
 
     # Shift out everything but the sign bits
@@ -50,6 +50,16 @@ when hasNeon:
     # Extract the low 8 bits from each lane and join them.
     cast[int32](vgetq_lane_u8(paired64, 0)) or
       cast[int32](vgetq_lane_u8(paired64, 8) shl 8'i32)
+
+  template moveMaskNeonImpl(input: uint8x16): int32 =
+    let hi = vshrq_n_u8(input, 7)
+    let magic =
+      uint8x16_immediate([128'u8, 64, 32, 16, 8, 4, 2, 1, 128, 64, 32, 16, 8, 4, 2, 1])
+
+    let masked = vmulq_u8(hi, magic)
+
+    cast[int32](vaddv_u8(vget_low_u8(masked))) or
+      (cast[int32](vaddv_u8(vget_high_u8(masked))) shl 8)
 
   template mask8NeonImpl(vec: uint8x16, against: uint8x16): int32 =
     moveMaskNeonImpl(vceqq_u8(vec, against))
