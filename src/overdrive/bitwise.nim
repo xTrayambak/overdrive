@@ -35,6 +35,12 @@ when hasNeon:
   template allZeroNeonImpl[U: Vectorizable](a, b: Vector[U]): bool =
     vmaxvq_u8(vandq_u8(a.reg, b.reg)) == 0'u8
 
+  template orNeonImpl[U: Vectorizable](a, b: Vector[U]): Vector[U] =
+    Vector[U](reg: cast[RegisterImpl[U]](vorrq_u8(a.reg, b.reg)))
+
+  template andNeonImpl[U: Vectorizable](a, b: Vector[U]): Vector[U] =
+    Vector[U](reg: cast[RegisterImpl[U]](vandq_u8(a.reg, b.reg)))
+
 func allZero*[U: Vectorizable](a, b: Vector[U]): bool =
   when hasAvx2:
     allZeroAvx2Impl(a, b)
@@ -52,6 +58,8 @@ func `and`*[U: Vectorizable](a, b: Vector[U]): Vector[U] =
     andAvx2Impl(a, b)
   elif hasSse2:
     andSse2Impl(a, b)
+  elif hasNeon:
+    andNeonImpl(a, b)
   else:
     {.error: "Unsupported architecture for `and`".}
 
@@ -60,5 +68,7 @@ func `or`*[U: Vectorizable](a, b: Vector[U]): Vector[U] =
     orAvx2Impl(a, b)
   elif hasSse2:
     orSse2Impl(a, b)
+  elif hasNeon:
+    orNeonImpl(a, b)
   else:
     {.error: "Unsupported architecture for `or`".}
