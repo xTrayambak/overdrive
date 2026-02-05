@@ -29,6 +29,8 @@ when hasNeon:
   func vreinterpretq_u32_u16*(v: uint16x8): uint32x4
   func vreinterpretq_u8_u64*(v: uint64x2): uint8x16
   func vreinterpretq_u8_u16*(v: uint16x8): uint8x16
+  func vmulq_u8*(a, b: uint8x16): uint8x16
+  func vaddv_u8*(a: uint8x8): uint8
 
   {.pop.}
 
@@ -53,8 +55,9 @@ when hasNeon:
 
   template moveMaskNeonImpl(input: uint8x16): int32 =
     let hi = vshrq_n_u8(input, 7)
-    let magic =
-      uint8x16_immediate([128'u8, 64, 32, 16, 8, 4, 2, 1, 128, 64, 32, 16, 8, 4, 2, 1])
+
+    var magicDat = [1'u8, 2, 4, 8, 16, 32, 64, 128, 1, 2, 4, 8, 16, 32, 64, 128]
+    let magic = vld1q_u8(magicDat[0].addr)
 
     let masked = vmulq_u8(hi, magic)
 
