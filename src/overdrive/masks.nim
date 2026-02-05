@@ -159,6 +159,8 @@ func moveMask*[U: Vectorizable](vec: Vector[U]): int32 {.inline.} =
     moveMaskAvx2Impl(vec.reg)
   elif hasSse2:
     moveMaskSse2Impl(vec.reg)
+  elif hasNeon:
+    moveMaskNeonImpl(cast[uint8x16](vec.reg))
   else:
     {.error: "Unsupported architecture for moveMask()".}
 
