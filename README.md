@@ -1,6 +1,8 @@
 # overdrive
 Overdrive is a high-performance SIMD abstraction library for Nim that aims to abstract away SIMD operations behind a neat, (mostly) safe Nim-like API.
 
+The gist is that it lets you write SIMD code that runs on a lot of stuff, ranging from your desktop/laptop to your Android phone, to your tablet, to your smart TV.
+
 # features
 - [X] Store
 - [X] Indexing
@@ -15,8 +17,8 @@ Overdrive is a high-performance SIMD abstraction library for Nim that aims to ab
 - [X] SSE3 support
 - [X] SSE2 support
 - [X] Scalar fallback support (see section "Scalar Fallback")
-- [ ] Multi-arch CI setup (chore)
-- [ ] NEON support
+- [X] Multi-arch CI setup (chore)
+- [X] NEON support
 - [ ] RVV support
 - [ ] WASM SIMD support (for Emscripten target)
 
