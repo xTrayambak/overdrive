@@ -5,7 +5,7 @@ import pkg/overdrive/[types, flags]
 
 when hasAvx2:
   template allZeroAvx2Impl[U: Vectorizable](a, b: Vector[U]): bool =
-    mm256_testz_si256(a.reg, b.reg) == 0'i32
+    mm256_testz_si256(a.reg, b.reg) != 0'i32
 
   template andAvx2Impl[U: Vectorizable](a, b: Vector[U]): Vector[U] =
     Vector[U](reg: mm256_and_si256(a.reg, b.reg))
@@ -15,19 +15,15 @@ when hasAvx2:
 
 when hasSse41:
   template allZeroSse41Impl[U: Vectorizable](a, b: Vector[U]): bool =
-    mm_testz_si128(a.reg, b.reg) == 0'i32
+    mm_testz_si128(a.reg, b.reg) != 0'i32
 
 when hasSse2:
   template allZeroSse2Impl[U: Vectorizable](a, b: Vector[U]): bool =
     {.warning: "Using slower SSE2 based allZero() op, performance will be degraded.".}
     {.warning: "If possible, please compile with SSE 4.1 support (-d:sse41)".}
 
-    let x = mm_and_si128(a.reg, b.reg)
-    var t = mm_or_si128(x, mm_srli_si128(x, 8))
-
-    t = mm_or_si128(t, mm_srli_si128(t, 4))
-
-    mm_cvtsi128_si32(t) == 0'i32
+    mm_movemask_epi8(mm_cmpeq_epi8(mm_and_si128(a.reg, b.reg), mm_setzero_si128())) ==
+      0xFFFF'i32
 
   template andSse2Impl[U: Vectorizable](a, b: Vector[U]): Vector[U] =
     Vector[U](reg: mm_and_si128(a.reg, b.reg))

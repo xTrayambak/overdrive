@@ -166,7 +166,7 @@ func findAllOccurrences*[U: Vectorizable](
     vec: Vector[U], against: Vector[U]
 ): seq[uint8] {.inline.} =
   let masked = mask(vec, against)
-  var occurrences: seq[uint8]
+  var occurrences: seq[uint8] # OPTIMIZE: This'll reallocate constantly!
 
   for i in 0'u8 ..< 32'u8:
     if ((masked shr i) and 1) == 1:
